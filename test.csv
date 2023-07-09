@@ -1,0 +1,5 @@
+"filename","score","info","popular_threat_label","threat_category","family_label","microsoft","crowdstrike","tencent","mitre"
+"aaa","65","peexe","trojan.aovi/rogue","trojan","aovi","Rogue:Win32/Winwebsec","Win/malicious_confidence_100% (W)","Malware.Win32.Gencirc.10be70cc",""
+"","/ 70","checks-user-input","","fakeav","rogue","","","",""
+"","","spreader","","adware","fkealrt","","","",""
+"","","detect-debug-environment","","","","","","",""
