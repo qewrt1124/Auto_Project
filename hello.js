@@ -3,8 +3,8 @@ const json2csv = require("json2csv");
 const fs = require("fs");
 
 function main() {
-    let filename = "7e4b0d8c96e6462a12b282225e1cdc376c6ae8ec";
-    let url = "https://www.virustotal.com/gui/file/24229e9c576e9b65e33c58f27db4da279d04ed1206c961412ce364d55cb0b3d4";
+    let filename = "12b";
+    let url = "https://www.virustotal.com/gui/file/12bab34ccc85de745615b8fa63ae9ca1bbfb45b5e73b18b800096f827d024c49";
 
     test(url, filename);
 }
@@ -111,8 +111,6 @@ async function test(url, filename) {
         let Mitre_list = [];
         let detection_list;
         let description_list;
-
-        const count_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("h5");
 
         if(status !== "NOT FOUND") {
             const h5_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("h5");
