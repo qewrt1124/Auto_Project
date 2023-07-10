@@ -1,11 +1,10 @@
 const puppeteer = require("puppeteer");
 const json2csv = require("json2csv");
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require("fs");
 
 function main() {
-    let filename = "aaa";
-    let url = "https://www.virustotal.com/gui/file/49151b6a374a646f004b68cf0d97c2ef7ccde025df4823f297653b34e410a2ce/";
+    let filename = "7e4b0d8c96e6462a12b282225e1cdc376c6ae8ec";
+    let url = "https://www.virustotal.com/gui/file/24229e9c576e9b65e33c58f27db4da279d04ed1206c961412ce364d55cb0b3d4";
 
     test(url, filename);
 }
@@ -13,7 +12,7 @@ function main() {
 async function test(url, filename) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto(url + "detection");
+    await page.goto(url + "/detection");
 
     let data = await page.evaluate(() => {
 
@@ -52,7 +51,7 @@ async function test(url, filename) {
         const Family = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > span > div > div:nth-child(3) > div").querySelectorAll("a");
 
         let Family_list = [];
-        for(let i = 0; i < Threat.length; i++) {
+        for(let i = 0; i < Family.length; i++) {
             let result = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > span > div > div:nth-child(3) > div").querySelectorAll("a")[i].innerText.trim();
             Family_list.push(result);
         }
@@ -100,18 +99,49 @@ async function test(url, filename) {
 
     await browser.close();
 
-    // // behavior
-    // const browser2 = await puppeteer.launch();
-    // const page2 = await browser2.newPage();
-    // await page2.goto(url + "behavior");
-    // let data2 = await page2.evaluate(() => {
-    //
-    //     // behavior not found
-    //     const status = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report").querySelector(".tab-slot").querySelector("#behaviourtab").shadowRoot.querySelectorAll("div")[3].querySelector(".activity-summary").querySelector(".container");
-    //
-    //     // const status = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("div:nth-child(4) > div > div > div > div:nth-child(2) > div:nth-child(2) > span").innerText;
-    //     console.log("status : " + status);
-    // });
+    // behavior
+    const browser2 = await puppeteer.launch();
+    const page2 = await browser2.newPage();
+    await page2.goto(url + "/behavior");
+    let data2 = await page2.evaluate(() => {
+
+        // behavior not found
+        const status = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("div:nth-child(4) > div > div > div > div:nth-child(2) > div:nth-child(2)").querySelector("span").innerText;
+
+        let Mitre_list = [];
+        let detection_list;
+        let description_list;
+
+        const count_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("h5");
+
+        if(status !== "NOT FOUND") {
+            const h5_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("h5");
+
+            const table_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("table");
+
+            for(let i = 0; i < h5_list.length; i++) {
+                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("a").innerText);
+                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("span").innerText);
+                detection_list = table_list[i].querySelectorAll("tr");
+                for(let j = 0; j < detection_list.length; j++) {
+                    description_list = detection_list[j].querySelector("span").querySelectorAll("div");
+                    Mitre_list.push(description_list[0].querySelector("a").innerText);
+                    Mitre_list.push(description_list[0].querySelector("span").innerText);
+                    aa_list = detection_list[j].querySelectorAll(".mitre-signature");
+                    for(let k = 0; k < aa_list.length; k++) {
+                        Mitre_list.push(aa_list[k].querySelector(".mb-0").innerText);
+                    }
+                    // Mitre_list.push(detection_list[j].querySelector(".mb-0").innerText);
+                }
+            }
+        }
+
+        return {
+            mitre_list : Mitre_list
+        }
+    });
+
+    await browser2.close();
 
     // scv 파일 형식
     let end = {
@@ -137,6 +167,7 @@ async function test(url, filename) {
     arr_length.push(data.Popular.length);
     arr_length.push(data.Threat_list.length);
     arr_length.push(data.Family_list.length);
+    arr_length.push(data2.mitre_list.length);
 
     let max_length = Math.max.apply(null, arr_length);
 
@@ -182,14 +213,24 @@ async function test(url, filename) {
     // tencent 집어 넣기
     end_list[0].tencent = data.Tencent;
 
+    // mitre 집어 넣기
+    for(let i = 0; i < data2.mitre_list.length; i++) {
+        end_list[i].mitre = data2.mitre_list[i];
+    }
+
+    // csv 파일 쓰기
     const csv_data = json2csv.parse(end_list);
-    fs.writeFileSync("./test.csv", csv_data, (err) => {
+    const directory = "C:\\Users\\qewrt\\alba\\secure\\";
+
+    fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {
         if(err) {
             console.log("fail!!!!!!!!!!!!");
         } else {
-            console.log("Done!!!!!!!!!!!!!!!1");
+            console.log(filename);
         }
     });
+
+    console.log(filename)
 }
 
 main();
