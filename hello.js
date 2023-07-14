@@ -3,15 +3,26 @@ const json2csv = require("json2csv");
 const fs = require("fs");
 
 function main() {
-    let filename = "106518";
-    let url = "https://www.virustotal.com/gui/file/a73485420f078fa279bb65b476838cb8307c0bbf48979a8a8fdcf06b2b314add";
-    let check= false;
-    // let check = true;
+    const file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\securelink_4";
+    let check = true;
 
-    test(url, filename, check);
+    fs.readdir(file_location, async (err, files) => {
+        for (let i = 0; i < files.length; i++) {
+            let url = await open_page(files[i], file_location);
+            console.log(1111111);
+            await make_csv(url, files[i], check);
+            // await fs.unlinkSync(file_location + "\\" + files[i]);
+        }
+    });
 }
 
-async function test(url, filename, check) {
+function sleep(ms) {
+    return new Promise((r) => setTimeout(r, ms));
+}
+
+async function make_csv(url, filename, check) {
+    console.log(url);
+
     const browser = await puppeteer.launch({
         args:["--windows-size=1920,1080"]
     });
@@ -22,10 +33,23 @@ async function test(url, filename, check) {
         height: 1080
     });
 
-    await page.goto(url + "/detection");
+    await page.goto(url + "/detection", {
+        waitUntil: "networkidle2"
+    });
+
+    //behavior check
+    let behavior_text = await page.evaluate(() => {
+        const behavior_element = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report").shadowRoot.querySelector("div > div:nth-child(2) > div > ul > li:nth-child(5)").querySelector("a");
+        const style = getComputedStyle(behavior_element);
+
+        return style.visibility;
+    });
+
+    if(behavior_text !== "visible") {
+        check = false;
+    }
 
     let data = await page.evaluate(() => {
-
         // positives
         const positives = document.querySelector("#view-container").querySelector("file-view").shadowRoot.querySelector("#report").shadowRoot.querySelector(".container").querySelector(".d-none").querySelector(".col-auto").querySelector("vt-ui-detections-widget").shadowRoot.querySelector(".engines").querySelector(".circle").querySelector(".positives").innerText.trim();
 
@@ -143,7 +167,11 @@ async function test(url, filename, check) {
             }
         });
 
-        await page2.goto(url + "/behavior");
+        await page2.goto(url + "/behavior", {
+            waitUntil: "networkidle2"
+        });
+
+        sleep(2000);
 
         data2 = await page2.evaluate(() => {
             // behavior not found
@@ -152,8 +180,6 @@ async function test(url, filename, check) {
             let Mitre_list = [];
             let detection_list;
             let description_list;
-
-            console.log(status);
 
             if(status !== "NOT FOUND") {
                 const h5_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("h5");
@@ -279,7 +305,7 @@ async function test(url, filename, check) {
         }
     });
 
-    let sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
+    const sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
 
     await  page.screenshot({
         path: sc_path + filename + ".jpg",
@@ -291,8 +317,46 @@ async function test(url, filename, check) {
             height: 1033
         }
     });
-    console.log(filename)
+
+    console.log(filename);
     await browser.close();
+}
+
+async function open_page(file_name, file_location) {
+    const path = file_location + "\\" + file_name;
+
+    const browser = await puppeteer.launch({
+        headless: false,
+        args:["--windows-size=1920,1080"]
+    });
+
+    const page = await browser.newPage();
+
+    await page.setViewport({
+        width: 1920,
+        height: 1080
+    });
+
+    await page.goto("https://www.virustotal.com/gui/home/upload", {
+        waitUntil: "networkidle2"
+    });
+
+    const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        await page.evaluate( () => document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("#fileSelector").click()),
+    ]);
+
+    await fileChooser.accept([path]);
+
+    await sleep(3000);
+
+    let current_url = await page.url();
+
+    await sleep(1000);
+
+    browser.close();
+
+    return current_url;
 }
 
 main();
