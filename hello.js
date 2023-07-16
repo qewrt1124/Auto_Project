@@ -2,16 +2,62 @@ const puppeteer = require("puppeteer");
 const json2csv = require("json2csv");
 const fs = require("fs");
 
-function main() {
-    const file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\securelink_4";
-    let check = true;
+function openPage_moveCheck() {
+    const file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\complete";
+    const check_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\check";
 
     fs.readdir(file_location, async (err, files) => {
         for (let i = 0; i < files.length; i++) {
+            console.log("before : " + files[i]);
             let url = await open_page(files[i], file_location);
-            console.log(1111111);
+            await fs.rename(file_location + "\\" + files[i], check_location + "\\" + files[i], (err) => {
+                if(err !== null) {
+                    fs.copyFile(file_location + "\\" + files[i], check_location + "\\" + files[i], () => {
+                        fs.unlinkSync(file_location + "\\" + files[i]);
+                    });
+                }
+            });
+        }
+    });
+}
+
+function reanalyze_moveComplete() {
+    const original_path = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\securelink_4";
+    const complete_path = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\complete";
+
+    fs.readdir(original_path, async (err, files) => {
+        for (let i = 0; i < files.length; i++) {
+            console.log(files[i]);
+            await open_page2(files[i], original_path);
+            await fs.rename(original_path + "\\" + files[i], complete_path + "\\" + files[i], (err) => {
+                if(err !== null) {
+                    fs.copyFile(original_path + "\\" + files[i], complete_path + "\\" + files[i], () => {
+                        fs.unlinkSync(original_path + "\\" + files[i]);
+                    });
+                }
+            });
+        }
+    });
+}
+
+function makeCsv_moveCompleted() {
+    const file_completed_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\completed";
+    const check_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\check";
+    let check;
+
+    fs.readdir(check_location, async (err, files) => {
+        for (let i = 0; i < files.length; i++) {
+            console.log("before : " + files[i]);
+            let url = await open_page(files[i], check_location);
+
             await make_csv(url, files[i], check);
-            // await fs.unlinkSync(file_location + "\\" + files[i]);
+            await fs.rename(check_location + "\\" + files[i], file_completed_location + "\\" + files[i], (err) => {
+                if(err !== null) {
+                    fs.copyFile(check_location + "\\" + files[i], file_completed_location + "\\" + files[i], () => {
+                        fs.unlinkSync(check_location + "\\" + files[i]);
+                    });
+                }
+            });
         }
     });
 }
@@ -21,9 +67,8 @@ function sleep(ms) {
 }
 
 async function make_csv(url, filename, check) {
-    console.log(url);
-
     const browser = await puppeteer.launch({
+        headless: false,
         args:["--windows-size=1920,1080"]
     });
 
@@ -37,17 +82,20 @@ async function make_csv(url, filename, check) {
         waitUntil: "networkidle2"
     });
 
+    await sleep(10000);
+
     //behavior check
-    let behavior_text = await page.evaluate(() => {
+    check = await page.evaluate(() => {
         const behavior_element = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report").shadowRoot.querySelector("div > div:nth-child(2) > div > ul > li:nth-child(5)").querySelector("a");
         const style = getComputedStyle(behavior_element);
+        const rect = behavior_element.getBoundingClientRect();
 
-        return style.visibility;
+        if(style.visibility === "visible" && !!(rect.bottom || rect.top || rect.height || rect.width)) {
+            return true;
+        } else {
+            return false;
+        }
     });
-
-    if(behavior_text !== "visible") {
-        check = false;
-    }
 
     let data = await page.evaluate(() => {
         // positives
@@ -69,38 +117,42 @@ async function make_csv(url, filename, check) {
             flex_list.push(result);
         }
 
-        const label_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > .tab-slot > .popular-threat-name").querySelectorAll(".col");
-
-        const Popular = [];
+        let Popular = [];
         let Threat_list = [];
         let Family_list = [];
 
-        for(let i = 0; i < label_list.length; i++) {
+        if(document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > .tab-slot > .popular-threat-name") !== null) {
+            const label_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > .tab-slot > .popular-threat-name").querySelectorAll(".col");
 
-            let title = label_list[i].querySelector(".fw-bold").innerText.trim();
-            // Popular
-            if(title === "Popular threat label") {
-                const po_list = label_list[i].querySelectorAll("a");
-                for(let j = 0; j < po_list.length; j++) {
-                    Popular.push(po_list[j].innerText.trim());
+            let title = "";
+
+            for(let i = 0; i < label_list.length; i++) {
+
+                title = label_list[i].querySelector(".fw-bold").innerText.trim();
+                // Popular
+                if(title === "Popular threat label") {
+                    const po_list = label_list[i].querySelectorAll("a");
+                    for(let j = 0; j < po_list.length; j++) {
+                        Popular.push(po_list[j].innerText.trim());
+                    }
                 }
-            }
 
-            // Threat
-            if(title === "Threat categories") {
-                const Threat = label_list[i].querySelector(".tags").querySelectorAll("a");
+                // Threat
+                if(title === "Threat categories") {
+                    const Threat = label_list[i].querySelector(".tags").querySelectorAll("a");
 
-                for(let j = 0; j < Threat.length; j++) {
-                    Threat_list.push(Threat[j].innerText.trim());
+                    for(let j = 0; j < Threat.length; j++) {
+                        Threat_list.push(Threat[j].innerText.trim());
+                    }
                 }
-            }
 
-            // Family
-            if(title === "Family labels") {
-                const Family = label_list[i].querySelector(".tags").querySelectorAll("a");
+                // Family
+                if(title === "Family labels") {
+                    const Family = label_list[i].querySelector(".tags").querySelectorAll("a");
 
-                for(let j = 0; j < Family.length; j++) {
-                    Family_list.push(Family[j].innerText.trim());
+                    for(let j = 0; j < Family.length; j++) {
+                        Family_list.push(Family[j].innerText.trim());
+                    }
                 }
             }
         }
@@ -150,8 +202,17 @@ async function make_csv(url, filename, check) {
 
     // behavior
     if(check) {
-        const browser2 = await puppeteer.launch();
+        const browser2 = await puppeteer.launch({
+            headless: false,
+            args:["--windows-size=1920,1080"]
+        });
         const page2 = await browser2.newPage();
+
+        await page2.setViewport({
+            width: 1920,
+            height: 1080
+        });
+
         await page2.setRequestInterception(true);
         page2.on('request', (req) => {
             if (
@@ -171,7 +232,7 @@ async function make_csv(url, filename, check) {
             waitUntil: "networkidle2"
         });
 
-        sleep(2000);
+        await sleep(12000);
 
         data2 = await page2.evaluate(() => {
             // behavior not found
@@ -297,7 +358,7 @@ async function make_csv(url, filename, check) {
 
     // console.log(csv_data);
 
-    fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {
+    await fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {
         if(err) {
             console.log("fail!!!!!!!!!!!!");
         } else {
@@ -307,7 +368,7 @@ async function make_csv(url, filename, check) {
 
     const sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
 
-    await  page.screenshot({
+    await page.screenshot({
         path: sc_path + filename + ".jpg",
         fullPage: false,
         clip: {
@@ -318,11 +379,67 @@ async function make_csv(url, filename, check) {
         }
     });
 
-    console.log(filename);
+    await console.log(filename);
+
     await browser.close();
 }
 
 async function open_page(file_name, file_location) {
+    const path = file_location + "\\" + file_name;
+    let current_url = "";
+
+    const browser = await puppeteer.launch({
+        headless: false,
+        args:["--windows-size=1920,1080"]
+    });
+
+    const page = await browser.newPage();
+
+    await page.setViewport({
+        width: 1920,
+        height: 1080
+    });
+
+    await page.goto("https://www.virustotal.com/gui/home/upload", {
+        waitUntil: "networkidle2"
+    });
+
+    const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        await page.evaluate( () => document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("#fileSelector").click()),
+    ]);
+
+    await fileChooser.accept([path]);
+
+    await sleep(3000);
+
+    if("https://www.virustotal.com/gui/home/upload" === page.url()) {
+        await page.evaluate(async () => {
+            await document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("div > form > button:nth-child(6)").click();
+        });
+
+        await sleep(3000);
+
+        current_url = await page.url();
+
+        await sleep(1000);
+
+        await browser.close();
+
+        return current_url;
+    }
+
+
+    current_url = await page.url();
+
+    await sleep(1000);
+
+    await browser.close();
+
+    return current_url;
+}
+
+async function open_page2(file_name, file_location) {
     const path = file_location + "\\" + file_name;
 
     const browser = await puppeteer.launch({
@@ -350,13 +467,31 @@ async function open_page(file_name, file_location) {
 
     await sleep(3000);
 
-    let current_url = await page.url();
+    // file upload button
+    if("https://www.virustotal.com/gui/home/upload" === page.url()) {
+        await page.evaluate(async () => {
+            const upload_button = await document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("div > form > button:nth-child(6)");
+            await upload_button.click();
+        });
+
+        sleep(1000);
+
+        await browser.close();
+
+        return 0;
+    }
+
+    await sleep(10000).then(() => {
+        page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click())
+    });
 
     await sleep(1000);
 
-    browser.close();
+    await browser.close();
 
-    return current_url;
+    return 0;
 }
 
-main();
+openPage_moveCheck();
+reanalyze_moveComplete();
+makeCsv_moveCompleted();
