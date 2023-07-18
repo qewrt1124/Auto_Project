@@ -229,7 +229,7 @@ async function make_csv(url, filename, check) {
             waitUntil: "networkidle2"
         });
 
-        await others.others.sleep(12000);
+        await others.sleep(12000);
 
         data2 = await page2.evaluate(() => {
             // behavior not found
@@ -252,7 +252,7 @@ async function make_csv(url, filename, check) {
                         description_list = detection_list[j].querySelector("span").querySelectorAll("div");
                         Mitre_list.push(description_list[0].querySelector("a").innerText);
                         Mitre_list.push(description_list[0].querySelector("span").innerText);
-                        aa_list = detection_list[j].querySelectorAll(".mitre-signature");
+                        let aa_list = detection_list[j].querySelectorAll(".mitre-signature");
                         for(let k = 0; k < aa_list.length; k++) {
                             Mitre_list.push(aa_list[k].querySelector(".mb-0").innerText);
                         }
@@ -408,7 +408,7 @@ async function open_page(file_name, file_location) {
 
     await fileChooser.accept([path]);
 
-    await others.others.sleep(3000);
+    await others.sleep(3000);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {

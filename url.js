@@ -62,7 +62,7 @@ async function get_url(file_location, file_name) {
     return current_url;
 }
 
-async function get_url_list(csv_file_location) {
+export async function get_url_list(csv_file_location) {
     csv_file_location = "/Users/yang/Downloads/40015.csv";
     const url = fs.readFileSync(csv_file_location, "utf-8");
     const url_list = url.split("\r\n");
