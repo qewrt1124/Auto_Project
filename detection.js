@@ -1,15 +1,16 @@
 const puppeteer = require("puppeteer");
 const others = require("others");
-export async function detection_page(url) {
-    const page = await open_page(url);
-    const behaviorCheck = await behavior_check(page);
-    const score = await get_score(page);
-    const flex = await get_flex(page);
-    const popular_tab = await get_popular_tab(page);
-    const company_tab = await get_company_tab(page);
+export async function detection_page(url, filename) {
+    const page_info = await open_page(url);
+    const behaviorCheck = await behavior_check(page_info.page);
+    const score = await get_score(page_info.page);
+    const flex = await get_flex(page_info.page);
+    const popular_tab = await get_popular_tab(page_info.page);
+    const company_tab = await get_company_tab(page_info.page);
 
     return {
-        page : page,
+        page : page_info.page,
+        browser : page_info.browser,
         behaviorCheck : behaviorCheck,
         score : score,
         flex : flex,
@@ -34,9 +35,12 @@ async function open_page(url) {
         waitUntil: "networkidle2"
     });
 
-    others.sleep(5000);
+    await others.sleep(5000);
 
-    return page;
+    return {
+        page : page,
+        browser : browser
+    };
 }
 
 async function behavior_check(page) {
@@ -178,6 +182,21 @@ async function get_company_tab(page) {
     });
 
     return company_list;
+}
+
+async function screenShot(page, filename) {
+    const sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
+
+    await page.screenshot({
+        path: sc_path + filename + ".jpg",
+        fullPage: false,
+        clip: {
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1033
+        }
+    });
 }
 
 
