@@ -21,7 +21,7 @@ async function remove_completed_files(file_location, completed_location) {
 
     completed_file.forEach((completed) => {
          for(let i = 0; i < original_file.length; i++) {
-            if(completed === original_file[i]) {
+            if(completed.split(".")[0] === original_file[i]) {
                 fs.unlinkSync(file_location + "\\" + completed);
                 break;
             }

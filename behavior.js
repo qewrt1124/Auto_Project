@@ -13,8 +13,8 @@ const others = require("./others.js");
  */
 async function behavior_page(url, page, behavior_check, browser) {
     if(behavior_check) {
-        const page = open_behavior_page(url, page);
-        const mitre = get_mitre(page);
+        const page_end = await open_behavior_page(url, page);
+        const mitre = await get_mitre(page_end);
         browser.close();
 
         return mitre;
@@ -32,23 +32,23 @@ async function behavior_page(url, page, behavior_check, browser) {
  * @returns {page} Page page 반환
  */
 async function open_behavior_page(url, page) {
-    page.on('request', (req) => {
-        if (
-            req.resourceType() === 'image' ||
-            req.resourceType() === 'font' ||
-            req.resourceType() === 'stylesheet'
-        ) {
-            // 만약 요청 타입이 '이미지' or 'CSS' or '폰트' 라면
-            req.abort(); // 거부
-        } else {
-            // 이미지가 아니라면
-            req.continue(); // 수락
-        }
-    });
+    // page.on('request', (req) => {
+    //     if (
+    //         req.resourceType() === 'image' ||
+    //         req.resourceType() === 'font' ||
+    //         req.resourceType() === 'stylesheet'
+    //     ) {
+    //         // 만약 요청 타입이 '이미지' or 'CSS' or '폰트' 라면
+    //         req.abort(); // 거부
+    //     } else {
+    //         // 이미지가 아니라면
+    //         req.continue(); // 수락
+    //     }
+    // });
 
     page.goto(url + "/behavior");
 
-    others.sleep(10000);
+    await others.sleep(5000);
 
     return page;
 }

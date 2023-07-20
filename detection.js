@@ -15,6 +15,8 @@ async function detection_page(url, filename) {
     const popular_tab = await get_popular_tab(page_info.page);
     const company_tab = await get_company_tab(page_info.page);
 
+    await screenShot(page_info.page, filename);
+
     return {
         page : page_info.page,
         browser : page_info.browser,
@@ -178,7 +180,7 @@ async function get_popular_tab(page) {
 /**
  * company tab 반환하는 함수
  * @param page Page page
- * @returns {{microsoft : String, crowdStrike : String, tencent : String}}
+ * @returns {{microsoft : String, crowd_strike : String, tencent : String}}
  */
 async function get_company_tab(page) {
     const company_list = page.evaluate(() => {
@@ -213,7 +215,7 @@ async function get_company_tab(page) {
 
         return {
             microsoft : microsoft,
-            crowdStrike : crowdStrike,
+            crowd_strike : crowdStrike,
             tencent : tencent
         }
     });
@@ -228,7 +230,7 @@ async function get_company_tab(page) {
  * @returns {Promise<void>}
  */
 async function screenShot(page, filename) {
-    const sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
+    const sc_path = "/Users/yang/alba/screen_shot/";
 
     await page.screenshot({
         path: sc_path + filename + ".jpg",

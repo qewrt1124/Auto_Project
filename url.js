@@ -4,7 +4,7 @@ const json2csv = require("json2csv");
 const others = require("./others.js");
 
 /**
- * url csv 형식
+ * url && fileName의 csv 파일의 형식
  * @type {{file_name: string, url: string}}
  */
 let url_file = {
@@ -19,7 +19,7 @@ let url_file = {
  * @param completed_location 완료 파일 이동 위치
  * @returns {Promise<void>}
  */
-async function get_url_end(file_location, csv_location, completed_location) {
+async function make_original_csvFile(file_location, csv_location, completed_location) {
     const work_file_list = fs.readdirSync(file_location);
     const original_csv = "original3.csv";
     for (const file_name of (work_file_list)) {
@@ -29,28 +29,20 @@ async function get_url_end(file_location, csv_location, completed_location) {
             continue;
         }
 
-        if(await check_same_scv_file(csv_location, original_csv)) {
-            console.log(true);
-            let list = get_url_list(csv_location, original_csv);
-            await make_url_csv(csv_location, list, file_name, current_url, original_csv);
-        } else {
-            console.log(false);
-            let list = [];
-            await make_url_csv(csv_location, list, file_name, current_url, original_csv);
-        }
+        await make_url_csv(original_csv, file_name, current_url, original_csv);
 
-        fs.renameSync(file_location + "\\" + file_name, completed_location + "\\" + file_name);
+        fs.renameSync(file_location + "/" + file_name, completed_location + "/" + file_name);
     }
 }
 
 /**
- * original파일의 url 반환하는 함수
+ * original 파일의 url 반환하는 함수
  * @param file_location original파일 위치
  * @param file_name
  * @returns {Promise<string>}
  */
 async function get_url(file_location, file_name) {
-    const path = file_location + "\\" + file_name;
+    const path = file_location + "/" + file_name;
     let current_url = "";
 
     const browser = await puppeteer.launch({
@@ -114,9 +106,9 @@ async function get_url(file_location, file_name) {
  * @param csv_fileFullName csv 파일의 확장자명까지
  * @returns {[url_file]} url csv 파일 형식의 배열 반환
  */
-function get_url_list(csv_file_location, csv_fileFullName) {
-    const url = fs.readFileSync(csv_file_location + "\\" + csv_fileFullName, "utf-8");
-    const url_list = url.split("\r\n");
+async function get_url_list(csv_file_location, csv_fileFullName) {
+    const url = fs.readFileSync(csv_file_location + "/" + csv_fileFullName, "utf-8");
+    const url_list = url.split("\n");
 
     let result_list = [];
 
@@ -134,44 +126,70 @@ function get_url_list(csv_file_location, csv_fileFullName) {
 
 /**
  * url csv파일 만드는 함수
- * @param csv_file_location url csv 파일의 위치
- * @param result_list 기존의 url csv 파일의 json
+ * @param csv_location url csv 파일의 위치
  * @param file_name 추가할 파일 이름
  * @param url 추가할 url
+ * @param csv_file_name csv 파일 이름
  * @returns {Promise<void>}
  */
-async function make_url_csv(csv_file_location, result_list, file_name, url, csv_file_name) {
+async function make_url_csv(csv_location, file_name, url, csv_file_name) {
+    let list = [];
+
+    if(await check_same_scv_file(csv_location, csv_file_name)) {
+        list = await get_url_list(csv_location, csv_file_name);
+    } else {
+        list = [];
+    }
+
     let result = {...url_file};
     result.file_name = file_name;
     result.url = url;
 
-    result_list.push(result);
+    list.push(result);
 
-    const url_csv = json2csv.parse(result_list);
+    const url_csv = json2csv.parse(list);
 
-    fs.writeFileSync(csv_file_location + "\\" + csv_file_name, url_csv, (err) => {
-        console.log("success");
+    fs.writeFileSync(csv_location + "/" + csv_file_name, url_csv, (err) => {
+        console.log(err);
     });
 }
 
+async function pop_fileName_url(original_location) {
+    let list = await get_url_list(original_location);
+    let result = {...url_file};
+
+    result.file_name(list.pop().file_name);
+    result.url(list.pop().url);
+
+    return result;
+}
+
+async function delete_fileName_url(original_location, csv_file_name) {
+    let list = await get_url_list(original_location, csv_file_name);
+
+    list.pop();
+
+    if(list.length === 0) {
+        fs.unlinkSync(original_location + "/" + csv_file_name);
+    } else {
+        const url_csv = json2csv.parse(list);
+
+        fs.writeFileSync(original_location + "/" + csv_file_name, url_csv, (err) => {
+            console.log(err);
+        });
+    }
+}
+
 /**
- * 완료된 파일 옮기기
- * @param file_location 완료전 url.csv 파일 위치
- * @param completed_location 완료된 completed.csv 파일 위치
- * @param file_name
+ * 완료된 목록의 csv파일 만드는 함수
+ * @param original_csv_location 완료 전 csv파일 위치
+ * @param file_name 작업 파일 이름
+ * @param url 작업 url
+ * @param csv_file_name 만들 csv 파일 이름
  * @returns {Promise<void>}
  */
-async function make_completed_csv(file_location, completed_location, file_name) {
-    file_location = file_location + "\\" + file_name;
-    completed_location = completed_location + "\\" + file_name;
-    await fs.rename(file_location, completed_location, (err) => {
-       if(err !== null) {
-           fs.copyFile(file_location, completed_location, () => {
-               fs.unlinkSync(file_location);
-           })
-       }
-    });
-    console.log("complete : " + file_name);
+async function make_completed_csv(original_csv_location, file_name, url, csv_file_name) {
+    await make_url_csv(original_csv_location, file_name, url, csv_file_name);
 }
 
 /**
@@ -182,20 +200,44 @@ async function make_completed_csv(file_location, completed_location, file_name) 
  */
 async function check_same_scv_file(csv_location, file_name) {
     const files = fs.readdirSync(csv_location);
-    let check = true;
+    let check = false;
     for(let i = 0; i < files.length; i++) {
         if(files[i] === file_name) {
             check = true;
             break;
-        } else {
-            check = false;
         }
     }
 
     return check;
 }
 
+async function open_url(url) {
+    const browser = await puppeteer.launch({
+        headless: false,
+        args:["--windows-size=1920,1080"]
+    });
+
+    const page = await browser.newPage();
+
+    await page.setViewport({
+        width: 1920,
+        height: 1080
+    });
+
+    await page.goto(url, {
+        waitUntil: "networkidle2"
+    });
+
+    await others.sleep(1000);
+
+    browser.close();
+}
+
 module.exports = {
     get_url_list,
-    get_url_end
+    make_original_csvFile,
+    make_completed_csv,
+    delete_fileName_url,
+    get_url_list,
+    open_url
 };

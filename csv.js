@@ -24,8 +24,8 @@ let end = {
  * @param behavior behavior[] behavior 결과
  * @returns {Promise<void>}
  */
-async function make_end_csv(detection, behavior) {
-    const end_list = gather_Information(detection, behavior);
+async function make_end_csv(detection, behavior, file_name) {
+    const end_list = await gather_Information(detection, behavior, file_name);
     await make_csv(end_list);
 }
 
@@ -37,7 +37,7 @@ async function make_end_csv(detection, behavior) {
 async function make_csv(end_list) {
     // csv 파일 쓰기
     const csv_data = json2csv.parse(end_list);
-    const directory = "C:\\Users\\qewrt\\alba\\secure\\";
+    const directory = "/Users/yang/alba/csv/";
     const filename = end_list[0].filename
 
     await fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {
@@ -55,7 +55,7 @@ async function make_csv(end_list) {
  * @param behavior behavior함수 결과
  * @returns {[end]} end형식으로 된 리스트 반환
  */
-async function gather_Information(detection, behavior) {
+async function gather_Information(detection, behavior, file_name) {
     let end_list = [];
 
     // 최대값 찾기
@@ -75,7 +75,7 @@ async function gather_Information(detection, behavior) {
         end_list.push({...end});
     }
     // filename 집어 넣기
-    end_list[0].filename = detection.filename;
+    end_list[0].filename = file_name;
 
 
     // score 집어 넣기
@@ -85,7 +85,7 @@ async function gather_Information(detection, behavior) {
 
     // flex 집어 넣기
     detection.flex.forEach((flex, index) => {
-       end_list[index].flex = flex;
+       end_list[index].info = flex;
     });
 
     // popular 집어 넣기
@@ -100,20 +100,20 @@ async function gather_Information(detection, behavior) {
 
     // family 집어 넣기
     detection.popular_tab.family_list.forEach((family_list, index) => {
-        end_list[index].family_list = family_list;
+        end_list[index].family_label = family_list;
     });
 
     // microsoft 집어 넣기
     end_list[0].microsoft = detection.company_tab.microsoft;
 
     // crowdstrike 집어 넣기
-    end_list[0].crowdstrike = detection.company_tab.crowdstrike;
+    end_list[0].crowdstrike = detection.company_tab.crowd_strike;
 
     // tencent 집어 넣기
     end_list[0].tencent = detection.company_tab.tencent;
 
     // mitre 자동 집어 넣기
-    if(behavior !== null) {
+    if(behavior.length !== 0) {
         behavior.forEach((mitre, index) => {
             end_list[index].mitre = mitre;
         });
