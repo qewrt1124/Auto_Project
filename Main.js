@@ -10,4 +10,9 @@ async function work_url() {
     await url_fs.get_url_end(file_location, csv_location, completed_location);
 }
 
+async function test2() {
+    await others.test(file_location, csv_location);
+}
+
 work_url();
+// test2();

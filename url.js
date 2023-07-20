@@ -21,7 +21,7 @@ let url_file = {
  */
 async function get_url_end(file_location, csv_location, completed_location) {
     const work_file_list = fs.readdirSync(file_location);
-    const original_csv = "original3.csv";
+    const original_csv = "original2.csv";
     for (const file_name of (work_file_list)) {
         console.log("before : " + file_name);
         let current_url = await get_url(file_location, file_name);
@@ -30,11 +30,9 @@ async function get_url_end(file_location, csv_location, completed_location) {
         }
 
         if(await check_same_scv_file(csv_location, original_csv)) {
-            console.log(true);
             let list = get_url_list(csv_location, original_csv);
             await make_url_csv(csv_location, list, file_name, current_url, original_csv);
         } else {
-            console.log(false);
             let list = [];
             await make_url_csv(csv_location, list, file_name, current_url, original_csv);
         }
@@ -77,7 +75,7 @@ async function get_url(file_location, file_name) {
 
     await fileChooser.accept([path]);
 
-    await others.sleep(10000);
+    await others.sleep(7000);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {

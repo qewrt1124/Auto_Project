@@ -1,4 +1,5 @@
 const fs = require("fs")
+// const url_fs = require("./url.js");
 
 /**
  * 대기 시키는 함수
@@ -29,7 +30,24 @@ async function remove_completed_files(file_location, completed_location) {
     });
 }
 
+// async function test(original_location, csv_location) {
+//     const original_list = fs.readdirSync(original_location);
+//     const csv_files = fs.readdirSync(csv_location);
+//     for (const files of csv_files) {
+//         const csv_context = await url_fs.get_url_list(csv_location, files);
+//         for (const context of csv_context) {
+//             for (const original of original_list) {
+//                 if(context.file_name === original) {
+//                     fs.unlinkSync(original_location + "\\" + context.file_name);
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+// }
+
 module.exports = {
     sleep,
-    remove_completed_files
+    remove_completed_files,
+    // test
 };
