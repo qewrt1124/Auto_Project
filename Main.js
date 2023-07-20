@@ -1,23 +1,13 @@
-const url = require("/url");
-const others = require("/others");
-const detection_fn = require("/detection");
-const behavior_fn = require("behavior");
+const others = require("./others.js");
+const detection_fs = require("./detection.js");
+const behavior_fs = require("./behavior.js");
+const url_fs = require("./url.js");
 
-
-const file_location = "";
-const completed_location = "";
-const csv_location = "";
+const file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\sands_4";
+const completed_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\complete";
+const csv_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\url_csv\\original";
 async function work_url() {
-    await url.get_url_end(file_location, completed_location, csv_location);
+    await url_fs.get_url_end(file_location, csv_location, completed_location);
 }
 
-async function find_uncompleted_files() {
-    await others.search_else_files(file_location, completed_location);
-}
-
-async function main_csv(filename) {
-    const detection = detection_fn.detection_page(url, filename);
-    const behavior = behavior_fn.behavior_page(url, filename);
-}
 work_url();
-// find_uncompleted_files();

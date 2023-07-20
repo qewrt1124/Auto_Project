@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
 const json2csv = require("json2csv");
 const fs = require("fs");
-const others = require("others");
+const others = require("./others.js")
 
 function openPage_moveCheck() {
     const file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\complete";
@@ -79,7 +79,7 @@ async function make_csv(url, filename, check) {
         waitUntil: "networkidle2"
     });
 
-    await others.sleep(10000);
+    await sleep(10000);
 
     //behavior check
     check = await page.evaluate(() => {
@@ -229,7 +229,7 @@ async function make_csv(url, filename, check) {
             waitUntil: "networkidle2"
         });
 
-        await others.sleep(12000);
+        await sleep(12000);
 
         data2 = await page2.evaluate(() => {
             // behavior not found
@@ -408,18 +408,18 @@ async function open_page(file_name, file_location) {
 
     await fileChooser.accept([path]);
 
-    await others.sleep(3000);
+    await sleep(3000);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {
             await document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("div > form > button:nth-child(6)").click();
         });
 
-        await others.sleep(3000);
+        await sleep(3000);
 
         current_url = await page.url();
 
-        await others.sleep(1000);
+        await sleep(1000);
 
         await browser.close();
 
@@ -429,7 +429,7 @@ async function open_page(file_name, file_location) {
 
     current_url = await page.url();
 
-    await others.sleep(1000);
+    await sleep(1000);
 
     await browser.close();
 
@@ -462,7 +462,7 @@ async function open_page2(file_name, file_location) {
 
     await fileChooser.accept([path]);
 
-    await others.sleep(3000);
+    await sleep(3000);
 
     // file upload button
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
@@ -471,18 +471,18 @@ async function open_page2(file_name, file_location) {
             await upload_button.click();
         });
 
-        others.sleep(1000);
+        sleep(1000);
 
         await browser.close();
 
         return 0;
     }
 
-    await others.sleep(10000).then(() => {
+    await sleep(10000).then(() => {
         page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click())
     });
 
-    await others.sleep(1000);
+    await sleep(1000);
 
     await browser.close();
 
@@ -516,18 +516,18 @@ async function open_page3(file_name, file_location) {
 
     await fileChooser.accept([path]);
 
-    await others.sleep(3000);
+    await sleep(3000);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {
             await document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("div > form > button:nth-child(6)").click();
         });
 
-        await others.sleep(3000);
+        await sleep(3000);
 
         current_url = await page.url();
 
-        await others.sleep(1000);
+        await sleep(1000);
 
         await browser.close();
 
@@ -537,7 +537,7 @@ async function open_page3(file_name, file_location) {
 
     current_url = await page.url();
 
-    await others.sleep(1000);
+    await sleep(1000);
 
     await browser.close();
 
@@ -546,5 +546,5 @@ async function open_page3(file_name, file_location) {
 
 // get_url_list();
 // openPage_moveCheck();
-// reanalyze_moveComplete();
+reanalyze_moveComplete();
 // makeCsv_moveCompleted();

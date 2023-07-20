@@ -1,8 +1,11 @@
 const fs = require("fs");
 const json2csv = require("json2csv");
 
-// scv 파일 형식
-const end = {
+/**
+ * csv 형식
+ * @type {{score: string, filename: string, popular_threat_label: string, family_label: string, mitre: string, microsoft: string, crowdstrike: string, tencent: string, info: string, threat_category: string}}
+ */
+let end = {
     filename : "",
     score : "",
     info : "",
@@ -15,11 +18,22 @@ const end = {
     mitre : ""
 }
 
-export async function make_end_csv(detction, behavior) {
-    const end_list = gather_Information(detction, behavior);
+/**
+ * json -> csv된 객체를 csv 파일로 생성하는 함수
+ * @param detection detection{} detection 결과
+ * @param behavior behavior[] behavior 결과
+ * @returns {Promise<void>}
+ */
+async function make_end_csv(detection, behavior) {
+    const end_list = gather_Information(detection, behavior);
     await make_csv(end_list);
 }
 
+/**
+ * csv파일을 생성하는 함수
+ * @param end_list gather_Information함수에서 반환한 결과
+ * @returns {Promise<void>}
+ */
 async function make_csv(end_list) {
     // csv 파일 쓰기
     const csv_data = json2csv.parse(end_list);
@@ -35,6 +49,12 @@ async function make_csv(end_list) {
     });
 }
 
+/**
+ * json -> csv로 만드는 함수
+ * @param detection detection함수 결과
+ * @param behavior behavior함수 결과
+ * @returns {[end]} end형식으로 된 리스트 반환
+ */
 async function gather_Information(detection, behavior) {
     let end_list = [];
 
@@ -101,3 +121,7 @@ async function gather_Information(detection, behavior) {
 
     return end_list;
 }
+
+module.exports = {
+    make_end_csv
+};

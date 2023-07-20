@@ -1,7 +1,17 @@
 const puppeteer = require("puppeteer");
-const others = require("/others");
+const others = require("./others.js");
 
-export async function behavior_page(url, page, behavior_check, browser) {
+// behavior 페이지 관련 모듈
+
+/**
+ * behavior page 실행 함수
+ * @param url
+ * @param page detection에서 반환한 Page page
+ * @param behavior_check  detection에서 behavior탭이 있는지 확인한 결과
+ * @param browser detection에서 반환한 browser
+ * @returns {[[Promise<*|string>]]} mitre 정보 결과 반환(true = [], false = "")
+ */
+async function behavior_page(url, page, behavior_check, browser) {
     if(behavior_check) {
         const page = open_behavior_page(url, page);
         const mitre = get_mitre(page);
@@ -15,7 +25,13 @@ export async function behavior_page(url, page, behavior_check, browser) {
     }
 }
 
-async function open_behavior_page(url, page, behavior_check) {
+/**
+ * Go to behavior page
+ * @param url
+ * @param page detection에서 반환한 Page page
+ * @returns {page} Page page 반환
+ */
+async function open_behavior_page(url, page) {
     page.on('request', (req) => {
         if (
             req.resourceType() === 'image' ||
@@ -37,6 +53,11 @@ async function open_behavior_page(url, page, behavior_check) {
     return page;
 }
 
+/**
+ * mitre 리스트 가져오는 함수
+ * @param page detection에서 반환한 Page page
+ * @returns {[String]} mitre리스트 반환
+ */
 async function get_mitre(page) {
     const mitre_list = page.evaluate(() => {
         // behavior not found
@@ -72,3 +93,7 @@ async function get_mitre(page) {
 
     return mitre_list;
 }
+
+module.exports = {
+    behavior_page
+};

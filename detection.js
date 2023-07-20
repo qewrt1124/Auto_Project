@@ -1,6 +1,13 @@
 const puppeteer = require("puppeteer");
-const others = require("others");
-export async function detection_page(url, filename) {
+const others = require("./others.js");
+
+/**
+ * detection페이지로 이동 후 그 결과를 json 형식으로 반환
+ * @param url
+ * @param filename
+ * @returns {Promise<{score: *, company_tab: *, popular_tab: *, flex: *, browser: Browser, behaviorCheck: *, page: Page}>}
+ */
+async function detection_page(url, filename) {
     const page_info = await open_page(url);
     const behaviorCheck = await behavior_check(page_info.page);
     const score = await get_score(page_info.page);
@@ -19,9 +26,14 @@ export async function detection_page(url, filename) {
     }
 }
 
+/**
+ * detection 페이지 여는 함수
+ * @param url
+ * @returns {Promise<{browser: Browser, page: Page}>}
+ */
 async function open_page(url) {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args:["--windows-size=1920,1080"]
     });
 
@@ -43,6 +55,11 @@ async function open_page(url) {
     };
 }
 
+/**
+ * behavior탭이 있는지 확인하는 함수
+ * @param page Page page
+ * @returns {boolean} check 결과 반환
+ */
 async function behavior_check(page) {
     let check = await page.evaluate(() => {
         const behavior_element = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report").shadowRoot.querySelector("div > div:nth-child(2) > div > ul > li:nth-child(5)").querySelector("a");
@@ -59,6 +76,11 @@ async function behavior_check(page) {
     return check;
 }
 
+/**
+ * score 가져오는 함수
+ * @param page
+ * @returns {[positives : String, total : String]} score 리스트 반환
+ */
 async function get_score(page) {
     const score = page.evaluate(() => {
         // positives
@@ -73,6 +95,11 @@ async function get_score(page) {
     return score;
 }
 
+/**
+ * flex 리스트 가져오는 함수
+ * @param page Page page
+ * @returns {[String]} flex list 반환
+ */
 async function get_flex(page) {
     const flex_tab = page.evaluate(() => {
         const flex = document.querySelector("#view-container").querySelector("file-view").shadowRoot.querySelector("#report").querySelector("vt-ui-file-card").shadowRoot.querySelector(".card").querySelector(".card-body").querySelector(".vstack").querySelector(".flex-wrap").querySelectorAll("a");
@@ -91,6 +118,11 @@ async function get_flex(page) {
     return flex_tab;
 }
 
+/**
+ * popular tab 반환하는 함수
+ * @param page Page page
+ * @returns {{popular : String, threat_list : String, family_liat : String}}
+ */
 async function get_popular_tab(page) {
     const popular_tab = page.evaluate(() => {
         let Popular = [];
@@ -143,6 +175,11 @@ async function get_popular_tab(page) {
     return popular_tab;
 }
 
+/**
+ * company tab 반환하는 함수
+ * @param page Page page
+ * @returns {{microsoft : String, crowdStrike : String, tencent : String}}
+ */
 async function get_company_tab(page) {
     const company_list = page.evaluate(() => {
         let microsoft;
@@ -184,6 +221,12 @@ async function get_company_tab(page) {
     return company_list;
 }
 
+/**
+ * dection 페이지 스크린샷 찍는 함수
+ * @param page Page page
+ * @param filename
+ * @returns {Promise<void>}
+ */
 async function screenShot(page, filename) {
     const sc_path = "C:\\Users\\qewrt\\OneDrive\\사진\\스크린샷\\";
 
@@ -199,4 +242,6 @@ async function screenShot(page, filename) {
     });
 }
 
-
+module.exports = {
+    detection_page
+};
