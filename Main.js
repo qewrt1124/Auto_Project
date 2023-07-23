@@ -7,7 +7,7 @@ const csv_fs = require("./csv");
 // const mac_file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\sands_4";
 const mac_completed_location = "/Users/yang/alba/url/completed";
 const mac_original_csv_location = "/Users/yang/alba/url/original";
-const mac_csv_fileName = "original.csv";
+const mac_csv_fileName = "original2.csv";
 
 // async function original_csvFile() {
 //     await url_fs.make_original_csvFile(mac_file_location, mac_original_csv_location, mac_completed_location);
