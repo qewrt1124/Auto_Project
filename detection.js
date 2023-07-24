@@ -230,7 +230,7 @@ async function get_company_tab(page) {
  * @returns {Promise<void>}
  */
 async function screenShot(page, filename) {
-    const sc_path = "/Users/yang/alba/screen_shot/";
+    const sc_path = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\sreen_shot\\";
 
     await page.screenshot({
         path: sc_path + filename + ".jpg",

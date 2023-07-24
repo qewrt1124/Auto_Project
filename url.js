@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const json2csv = require("json2csv");
 const others = require("./others.js");
+const files_fs = require("./files");
 
 /**
  * url && fileName의 csv 파일의 형식
@@ -19,19 +20,19 @@ let url_file = {
  * @param completed_location 완료 파일 이동 위치
  * @returns {Promise<void>}
  */
-async function make_original_csvFile(file_location, csv_location, completed_location) {
+async function make_original_csvFile(file_location, csv_location, completed_location, original_csv) {
     const work_file_list = fs.readdirSync(file_location);
-    const original_csv = "original3.csv";
     for (const file_name of (work_file_list)) {
         console.log("before : " + file_name);
-        let current_url = await get_url(file_location, file_name);
+        const delay = await files_fs.get_dealy(file_location, file_name);
+        let current_url = await get_url(file_location, file_name, delay);
         if(file_name === "desktop.ini") {
             continue;
         }
 
-        await make_url_csv(original_csv, file_name, current_url, original_csv);
+        await make_url_csv(csv_location, file_name, current_url, original_csv);
 
-        fs.renameSync(file_location + "/" + file_name, completed_location + "/" + file_name);
+        fs.renameSync(file_location + "\\" + file_name, completed_location + "\\" + file_name);
     }
 }
 
@@ -41,7 +42,7 @@ async function make_original_csvFile(file_location, csv_location, completed_loca
  * @param file_name
  * @returns {Promise<string>}
  */
-async function get_url(file_location, file_name) {
+async function get_url(file_location, file_name, delay) {
     const path = file_location + "/" + file_name;
     let current_url = "";
 
@@ -69,7 +70,7 @@ async function get_url(file_location, file_name) {
 
     await fileChooser.accept([path]);
 
-    await others.sleep(10000);
+    await others.sleep(delay);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {
@@ -107,8 +108,8 @@ async function get_url(file_location, file_name) {
  * @returns {[url_file]} url csv 파일 형식의 배열 반환
  */
 async function get_url_list(csv_file_location, csv_fileFullName) {
-    const url = fs.readFileSync(csv_file_location + "/" + csv_fileFullName, "utf-8");
-    const url_list = url.split("\n");
+    const url = fs.readFileSync(csv_file_location + "\\" + csv_fileFullName, "utf-8");
+    const url_list = url.split("\r\n");
 
     let result_list = [];
 
@@ -149,7 +150,7 @@ async function make_url_csv(csv_location, file_name, url, csv_file_name) {
 
     const url_csv = json2csv.parse(list);
 
-    fs.writeFileSync(csv_location + "/" + csv_file_name, url_csv, (err) => {
+    fs.writeFileSync(csv_location + "\\" + csv_file_name, url_csv, (err) => {
         console.log(err);
     });
 }
@@ -170,11 +171,11 @@ async function delete_fileName_url(original_location, csv_file_name) {
     list.pop();
 
     if(list.length === 0) {
-        fs.unlinkSync(original_location + "/" + csv_file_name);
+        fs.unlinkSync(original_location + "\\" + csv_file_name);
     } else {
         const url_csv = json2csv.parse(list);
 
-        fs.writeFileSync(original_location + "/" + csv_file_name, url_csv, (err) => {
+        fs.writeFileSync(original_location + "\\" + csv_file_name, url_csv, (err) => {
             console.log(err);
         });
     }
