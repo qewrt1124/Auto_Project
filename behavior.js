@@ -61,7 +61,7 @@ async function open_behavior_page(url, page) {
 async function get_mitre(page) {
     const mitre_list = page.evaluate(() => {
         // behavior not found
-        const status = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("div:nth-child(4) > div > div > div > div:nth-child(2) > div:nth-child(2)").querySelector("span").innerText;
+        const status = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("div:nth-child(4) > div > div > div > div:nth-child(2) > div:nth-child(2)").querySelector("span").innerText.trim();
 
         let Mitre_list = [];
         let detection_list;
@@ -73,16 +73,19 @@ async function get_mitre(page) {
             const table_list = document.querySelector("#view-container > file-view").shadowRoot.querySelector("#behaviourtab").shadowRoot.querySelector("#mitre-tree").shadowRoot.querySelector("vt-ui-expandable > span:nth-child(2) > div").querySelectorAll("table");
 
             for(let i = 0; i < h5_list.length; i++) {
-                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("a").innerText);
-                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("span").innerText);
+                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("a").innerText.trim());
+                Mitre_list.push(h5_list[i].querySelector(".hstack").querySelector("span").innerText.trim());
                 detection_list = table_list[i].querySelectorAll("tr");
                 for(let j = 0; j < detection_list.length; j++) {
                     description_list = detection_list[j].querySelector("span").querySelectorAll("div");
-                    Mitre_list.push(description_list[0].querySelector("a").innerText);
-                    Mitre_list.push(description_list[0].querySelector("span").innerText);
+                    Mitre_list.push(description_list[0].querySelector("a").innerText.trim());
+
+                    const detail = description_list[0].querySelector("span").innerText.trim().split(" ");
+                    Mitre_list.push(detail[0]);
+
                     let aa_list = detection_list[j].querySelectorAll(".mitre-signature");
                     for(let k = 0; k < aa_list.length; k++) {
-                        Mitre_list.push(aa_list[k].querySelector(".mb-0").innerText);
+                        Mitre_list.push(aa_list[k].querySelector(".mb-0").innerText.trim());
                     }
                 }
             }
