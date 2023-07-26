@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const json2csv = require("json2csv");
 const others = require("./others.js");
+const files_fs = require("./files.js");
 
 /**
  * url && fileName의 csv 파일의 형식
@@ -19,19 +20,19 @@ let url_file = {
  * @param completed_location 완료 파일 이동 위치
  * @returns {Promise<void>}
  */
-async function make_original_csvFile(file_location, csv_location, completed_location) {
+async function make_original_csvFile(file_location, csv_location, original_csv) {
     const work_file_list = fs.readdirSync(file_location);
-    const original_csv = "original3.csv";
     for (const file_name of (work_file_list)) {
         console.log("before : " + file_name);
-        let current_url = await get_url(file_location, file_name);
+	const delay = await files_fs.get_delay(file_location, file_name);
+        let current_url = await get_url(file_location, file_name, delay);
         if(file_name === "desktop.ini") {
             continue;
         }
 
-        await make_url_csv(original_csv, file_name, current_url, original_csv);
+        await make_url_csv(csv_location, file_name, current_url, original_csv);
 
-        fs.renameSync(file_location + "/" + file_name, completed_location + "/" + file_name);
+        fs.unlinkSync(file_location + "/" + file_name);
     }
 }
 
@@ -41,7 +42,7 @@ async function make_original_csvFile(file_location, csv_location, completed_loca
  * @param file_name
  * @returns {Promise<string>}
  */
-async function get_url(file_location, file_name) {
+async function get_url(file_location, file_name, delay) {
     const path = file_location + "/" + file_name;
     let current_url = "";
 
@@ -63,13 +64,13 @@ async function get_url(file_location, file_name) {
 
     const [fileChooser] = await Promise.all([
         page.waitForFileChooser(),
-        await others.sleep(3000),
+        await others.sleep(5000),
         await page.evaluate( () => document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("#fileSelector").click()),
     ]);
 
     await fileChooser.accept([path]);
 
-    await others.sleep(10000);
+    await others.sleep(delay);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
         await page.evaluate(async () => {
@@ -213,7 +214,7 @@ async function check_same_scv_file(csv_location, file_name) {
 
 async function open_url(url) {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args:["--windows-size=1920,1080"]
     });
 
@@ -228,7 +229,7 @@ async function open_url(url) {
         waitUntil: "networkidle2"
     });
 
-    await others.sleep(1000);
+    await others.sleep(10000);
 
     browser.close();
 }
