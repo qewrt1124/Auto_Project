@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const json2csv = require("json2csv");
 const others = require("./others.js");
-const files_fs = require("./files");
+const files_fs = require("./files.js");
 
 /**
  * url && fileName의 csv 파일의 형식
@@ -20,7 +20,7 @@ let url_file = {
  * @param completed_location 완료 파일 이동 위치
  * @returns {Promise<void>}
  */
-async function make_original_csvFile(file_location, csv_location, completed_location, original_csv) {
+async function make_original_csvFile(file_location, csv_location, original_csv) {
     const work_file_list = fs.readdirSync(file_location);
     for (const file_name of (work_file_list)) {
         console.log("before : " + file_name);
@@ -30,9 +30,11 @@ async function make_original_csvFile(file_location, csv_location, completed_loca
             continue;
         }
 
+        console.log("url : " + current_url);
+
         await make_url_csv(csv_location, file_name, current_url, original_csv);
 
-        fs.renameSync(file_location + "\\" + file_name, completed_location + "\\" + file_name);
+        fs.unlinkSync(file_location + "\\" + file_name);
     }
 }
 
@@ -47,7 +49,7 @@ async function get_url(file_location, file_name, delay) {
     let current_url = "";
 
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args:["--windows-size=1920,1080"]
     });
 
@@ -73,13 +75,17 @@ async function get_url(file_location, file_name, delay) {
     await others.sleep(delay);
 
     if("https://www.virustotal.com/gui/home/upload" === page.url()) {
+        await others.sleep(5000);
+
         await page.evaluate(async () => {
             await document.querySelector("#view-container > home-view").shadowRoot.querySelector("#uploadForm").shadowRoot.querySelector("div > form > button:nth-child(6)").click();
         });
 
-        await others.sleep(3000);
+        await others.sleep(delay);
 
         current_url = await page.url();
+
+        // await page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click());
 
         await others.sleep(1000);
 
@@ -90,9 +96,7 @@ async function get_url(file_location, file_name, delay) {
 
     current_url = await page.url();
 
-    await others.sleep(7000).then(() => {
-        page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click())
-    });
+    // await page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click());
 
     await others.sleep(1000);
 
@@ -115,8 +119,10 @@ async function get_url_list(csv_file_location, csv_fileFullName) {
 
     for(let i = 1; i < url_list.length; i++) {
         const splited_list = url_list[i].split(",");
+
         const file_name = splited_list[0].replaceAll("\"", "");
         const url_value = splited_list[1].replaceAll("\"", "");
+
         result_list.push({...url_file});
         result_list[i - 1].file_name = file_name;
         result_list[i - 1].url = url_value;
@@ -214,7 +220,7 @@ async function check_same_scv_file(csv_location, file_name) {
 
 async function open_url(url) {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         args:["--windows-size=1920,1080"]
     });
 
@@ -231,7 +237,7 @@ async function open_url(url) {
 
     await others.sleep(1000);
 
-    browser.close();
+    await browser.close();
 }
 
 module.exports = {

@@ -5,20 +5,20 @@ const url_fs = require("./url.js");
 const csv_fs = require("./csv");
 
 const windows_file_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\securelink_7";
-const windows_completed_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\completed";
+const windows_completed_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\url_csv\\completed\\securelink_7";
 const windows_original_csv_location = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\url_csv\\original\\securelink_7";
-const windows_csv_fileName = "original1.csv";
+const windows_csv_fileName = "original8.csv";
 
 async function original_csvFile() {
-    await url_fs.make_original_csvFile(windows_file_location, windows_original_csv_location, windows_completed_location, windows_csv_fileName);
+    await url_fs.make_original_csvFile(windows_file_location, windows_original_csv_location, windows_csv_fileName);
 }
 
 async function main_working() {
     let file_content = await url_fs.get_url_list(windows_original_csv_location, windows_csv_fileName);
     console.log("length : " + file_content.length);
 
-    let count = 1;
-    for(let i = file_content.length - 1; i > 0; i--) {
+    let count = 0;
+    for(let i = file_content.length - 1; i >= 0; i--) {
         await make_csv_end(file_content, i);
         // await openPage(file_content);
         count++;
@@ -51,5 +51,5 @@ async function openPage(file_content) {
     await url_fs.open_url(url).then(url_fs.delete_fileName_url(windows_original_csv_location, windows_csv_fileName)).then(url_fs.make_completed_csv(windows_completed_location, fileName, url, windows_csv_fileName));
 }
 
-
-// main_working();
+// original_csvFile();
+main_working();

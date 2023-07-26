@@ -15,11 +15,11 @@ async function behavior_page(url, page, behavior_check, browser) {
     if(behavior_check) {
         const page_end = await open_behavior_page(url, page);
         const mitre = await get_mitre(page_end);
-        browser.close();
+        await browser.close();
 
         return mitre;
     } else {
-        browser.close();
+        await browser.close();
 
         return "";
     }
@@ -46,7 +46,9 @@ async function open_behavior_page(url, page) {
     //     }
     // });
 
-    page.goto(url + "/behavior");
+    await page.goto(url + "/behavior", {
+        waitUntil: "networkidle2"
+    });
 
     await others.sleep(5000);
 

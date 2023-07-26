@@ -37,7 +37,7 @@ async function make_end_csv(detection, behavior, file_name) {
 async function make_csv(end_list) {
     // csv 파일 쓰기
     const csv_data = json2csv.parse(end_list);
-    const directory = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\url_csv\\original\\securelink_7\\";
+    const directory = "C:\\Users\\qewrt\\OneDrive\\바탕 화면\\아르바이트\\시큐어링크\\파일\\강양구\\악성코드\\csv\\";
     const filename = end_list[0].filename
 
     await fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {
