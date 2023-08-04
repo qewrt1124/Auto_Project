@@ -1,4 +1,5 @@
-const fs = require("fs")
+const fs = require("fs");
+const request = require("request");
 
 /**
  * 대기 시키는 함수
@@ -29,7 +30,59 @@ async function remove_completed_files(file_location, completed_location) {
     });
 }
 
+/**
+ * err가 나면 텔레그램으로 알려주는 함수
+ */
+async function alert_err() {
+    let my_id = "6665974111";
+    let bot_token = "6454239328:AAELTyysCPgpcUz5JESuzm2mhcHqM9PKLJ8";
+    let message = "auto_server_01_err";
+
+    let options = {
+        url: "https://api.telegram.org/bot" + bot_token + "/sendmessage?chat_id=" + my_id + "&text=" + message,
+        method: "POST",
+    };
+      
+    function callback(error, response, body) {
+        if (!error && response.statusCode == 200) {
+          console.log("메시지 전송 완료.");
+        } else {
+          console.log(error);
+        }
+    }
+      
+    request(options, callback);
+
+    process.exit();
+}
+
+/**
+ * err가 나면 텔레그램으로 알려주는 함수
+ */
+async function alert_complete() {
+    let my_id = "6665974111";
+    let bot_token = "6454239328:AAELTyysCPgpcUz5JESuzm2mhcHqM9PKLJ8";
+    let message = "auto_server_01_complete";
+
+    let options = {
+        url: "https://api.telegram.org/bot" + bot_token + "/sendmessage?chat_id=" + my_id + "&text=" + message,
+        method: "POST",
+    };
+      
+    function callback(error, response, body) {
+        if (!error && response.statusCode == 200) {
+          console.log("메시지 전송 완료.");
+        } else {
+          console.log(error);
+        }
+    }
+      
+    request(options, callback);
+}
+
 module.exports = {
     sleep,
-    remove_completed_files
+    remove_completed_files,
+    alert_err,
+    alert_complete,
 };

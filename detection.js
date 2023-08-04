@@ -230,7 +230,7 @@ async function get_company_tab(page) {
  * @returns {Promise<void>}
  */
 async function screenShot(page, filename) {
-    const sc_path = "/home/ubuntu/alba/screen_shot/";
+    const sc_path = "/home/ubuntu/alba/screen_shot/sands_7/";
 
     await page.screenshot({
         path: sc_path + filename + ".jpg",

@@ -229,9 +229,43 @@ async function open_url(url) {
         waitUntil: "networkidle2"
     });
 
-    await others.sleep(10000);
-
+	await others.sleep(2000);
+    
     browser.close();
+}
+
+async function reanalize_click(url) {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args:["--windows-size=1920,1080"]
+    });
+
+    const page = await browser.newPage();
+
+    await page.setViewport({
+        width: 1920,
+        height: 1080
+    });
+
+    await page.goto(url, {
+        waitUntil: "networkidle2"
+    });
+
+    await others.sleep(5000);
+
+	await page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click());
+
+	await others.sleep(2000).then(captcha_page(page.url(), browser));
+    
+    // browser.close();
+}
+
+async function captcha_page(url, browser) {
+    if(url == "https://www.virustotal.com/gui/captcha") {
+        others.alert_err();
+        browser.close();
+        process.exit();
+    }
 }
 
 module.exports = {
