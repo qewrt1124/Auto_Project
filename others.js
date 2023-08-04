@@ -1,6 +1,8 @@
 const fs = require("fs");
 const request = require("request");
 
+const bot_url = "https://api.telegram.org/bot6454239328:AAELTyysCPgpcUz5JESuzm2mhcHqM9PKLJ8/sendmessage?chat_id=6665974111&text=";
+
 /**
  * 대기 시키는 함수
  * @param ms 1000ms -> 1s
@@ -30,52 +32,40 @@ async function remove_completed_files(file_location, completed_location) {
     });
 }
 
+function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log("메시지 전송 완료.");
+      process.exit();
+    } else {
+      console.log(error);
+      process.exit();
+    }
+}
+
 /**
  * err가 나면 텔레그램으로 알려주는 함수
  */
 async function alert_err() {
-    let my_id = "6665974111";
-    let bot_token = "6454239328:AAELTyysCPgpcUz5JESuzm2mhcHqM9PKLJ8";
-    let message = "auto_server_01_err";
+    const message = "auto_server_01_err";
 
     let options = {
-        url: "https://api.telegram.org/bot" + bot_token + "/sendmessage?chat_id=" + my_id + "&text=" + message,
+        url: bot_url + message,
         method: "POST",
     };
       
-    function callback(error, response, body) {
-        if (!error && response.statusCode == 200) {
-          console.log("메시지 전송 완료.");
-        } else {
-          console.log(error);
-        }
-    }
-      
     request(options, callback);
-
-    process.exit();
 }
 
 /**
  * err가 나면 텔레그램으로 알려주는 함수
  */
 async function alert_complete() {
-    let my_id = "6665974111";
-    let bot_token = "6454239328:AAELTyysCPgpcUz5JESuzm2mhcHqM9PKLJ8";
-    let message = "auto_server_01_complete";
+    const message = "auto_server_01_complete";
 
     let options = {
-        url: "https://api.telegram.org/bot" + bot_token + "/sendmessage?chat_id=" + my_id + "&text=" + message,
+        url: bot_url + message,
         method: "POST",
     };
-      
-    function callback(error, response, body) {
-        if (!error && response.statusCode == 200) {
-          console.log("메시지 전송 완료.");
-        } else {
-          console.log(error);
-        }
-    }
       
     request(options, callback);
 }

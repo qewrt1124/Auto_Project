@@ -21,9 +21,9 @@ async function main_working() {
         let count = 0;
     
         for(let i = file_content.length - 1; i >= 0; i--) {
-            // await make_csv_end(file_content, i);
+            await make_csv_end(file_content, i);
             // await reanalyze(file_content, i)
-            await openPage(file_content, i);
+            // await openPage(file_content, i);
             count++;
             console.log("count : " + count);
         }

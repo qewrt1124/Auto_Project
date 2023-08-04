@@ -251,20 +251,21 @@ async function reanalize_click(url) {
         waitUntil: "networkidle2"
     });
 
-    await others.sleep(5000);
+	captcha_page(page.url(), browser);
+
+    await others.sleep(10000);
 
 	await page.evaluate(() => document.querySelector("#view-container > file-view").shadowRoot.querySelector("#report > vt-ui-file-card").shadowRoot.querySelector("#reanalize").click());
 
 	await others.sleep(2000).then(captcha_page(page.url(), browser));
     
-    // browser.close();
+    browser.close();
 }
 
 async function captcha_page(url, browser) {
     if(url == "https://www.virustotal.com/gui/captcha") {
+	    browser.close();
         others.alert_err();
-        browser.close();
-        process.exit();
     }
 }
 
@@ -274,5 +275,6 @@ module.exports = {
     make_completed_csv,
     delete_fileName_url,
     get_url_list,
-    open_url
+    open_url,
+	reanalize_click,
 };
