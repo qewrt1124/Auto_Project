@@ -4,10 +4,10 @@ const behavior_fs = require("./behavior.js");
 const url_fs = require("./url.js");
 const csv_fs = require("./csv.js");
 
-const linux_file_location = "/home/ubuntu/alba/original_files/sands_7";
-const linux_completed_location = "/home/ubuntu/alba/url/completed/sands_7";
-const linux_original_csv_location = "/home/ubuntu/alba/url/original/sands_7";
-const linux_csv_fileName = "sands_7_01.csv";
+const linux_file_location = "/home/ubuntu/alba/original_files/sands_8";
+const linux_completed_location = "/home/ubuntu/alba/url/completed/sands_8";
+const linux_original_csv_location = "/home/ubuntu/alba/url/original/sands_8";
+const linux_csv_fileName = "sands_8_05.csv";
 
 async function original_csvFile() {
     await url_fs.make_original_csvFile(linux_file_location, linux_original_csv_location, linux_csv_fileName);
@@ -17,7 +17,6 @@ async function main_working() {
     try {
         let file_content = await url_fs.get_url_list(linux_original_csv_location, linux_csv_fileName);
         console.log("length : " + file_content.length);
-    
         let count = 0;
     
         for(let i = file_content.length - 1; i >= 0; i--) {
@@ -58,7 +57,9 @@ async function openPage(file_content, i) {
     const url = url_arr.url;
     console.log("filename : " + fileName);
     console.log("url : " + url);
-    await url_fs.open_url(url).then(url_fs.delete_fileName_url(linux_original_csv_location, linux_csv_fileName)).then(url_fs.make_completed_csv(linux_completed_location, fileName, url, linux_csv_fileName));
+    await url_fs.open_url(url)
+	.then(url_fs.delete_fileName_url(linux_original_csv_location, linux_csv_fileName))
+	.then(url_fs.make_completed_csv(linux_completed_location, fileName, url, linux_csv_fileName));
 }
 
 async function reanalyze(file_content, i) {

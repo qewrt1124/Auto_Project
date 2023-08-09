@@ -37,7 +37,7 @@ async function make_end_csv(detection, behavior, file_name) {
 async function make_csv(end_list) {
     // csv 파일 쓰기
     const csv_data = json2csv.parse(end_list);
-    const directory = "/home/ubuntu/alba/csv/sands_7/";
+    const directory = "/home/ubuntu/alba/csv/sands_8/";
     const filename = end_list[0].filename
 
     await fs.writeFileSync(directory + filename + ".csv", csv_data, (err) => {

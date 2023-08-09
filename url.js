@@ -117,6 +117,7 @@ async function get_url_list(csv_file_location, csv_fileFullName) {
         const splited_list = url_list[i].split(",");
         const file_name = splited_list[0].replaceAll("\"", "");
         const url_value = splited_list[1].replaceAll("\"", "");
+
         result_list.push({...url_file});
         result_list[i - 1].file_name = file_name;
         result_list[i - 1].url = url_value;
@@ -167,7 +168,7 @@ async function pop_fileName_url(original_location) {
 
 async function delete_fileName_url(original_location, csv_file_name) {
     let list = await get_url_list(original_location, csv_file_name);
-
+    
     list.pop();
 
     if(list.length === 0) {
@@ -229,9 +230,9 @@ async function open_url(url) {
         waitUntil: "networkidle2"
     });
 
-	await others.sleep(2000);
+    await others.sleep(2000).then(captcha_page(page.url(), browser)).then(browser.close());
     
-    browser.close();
+    // browser.close();
 }
 
 async function reanalize_click(url) {

@@ -49,7 +49,7 @@ async function open_page(url) {
         waitUntil: "networkidle2"
     });
 
-    await others.sleep(5000);
+    await others.sleep(7000);
 
     return {
         page : page,
@@ -230,7 +230,7 @@ async function get_company_tab(page) {
  * @returns {Promise<void>}
  */
 async function screenShot(page, filename) {
-    const sc_path = "/home/ubuntu/alba/screen_shot/sands_7/";
+    const sc_path = "/home/ubuntu/alba/screen_shot/sands_8/";
 
     await page.screenshot({
         path: sc_path + filename + ".jpg",
